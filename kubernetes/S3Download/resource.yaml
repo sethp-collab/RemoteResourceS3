@@ -1,0 +1,208 @@
+apiVersion: v1
+kind: List
+metadata:
+  name: s3download-controller-list
+  annotations:
+    version: "{{TRAVIS_COMMIT}}"
+items:
+  - apiVersion: v1
+    kind: Namespace
+    metadata:
+      name: razee
+      annotations:
+        razee.io/git-repo: "{{{GIT_REMOTE}}}"
+        razee.io/commit-sha: "{{TRAVIS_COMMIT}}"
+
+  - apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: s3download-controller
+      namespace: razee
+      annotations:
+        razee.io/git-repo: "{{{GIT_REMOTE}}}"
+        razee.io/commit-sha: "{{TRAVIS_COMMIT}}"
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: s3download-controller
+      strategy:
+        type: RollingUpdate
+      template:
+        metadata:
+          labels:
+            app: s3download-controller
+          name: s3download-controller
+        spec:
+          serviceAccountName: kapitan-sa
+          containers:
+          - image: "quay.io/razee/S3Download:{{TRAVIS_COMMIT}}"
+            imagePullPolicy: Always
+            name: s3download-controller
+            livenessProbe:
+              exec:
+                command:
+                - sh/liveness.sh
+              initialDelaySeconds: 30
+              periodSeconds: 300
+              timeoutSeconds: 30
+              failureThreshold: 1
+  - apiVersion: apiextensions.k8s.io/v1beta1
+    kind: CustomResourceDefinition
+    metadata:
+      # name must match the spec fields below, and be in the form: <plural>.<group>
+      name: s3downloads.kapitan.razee.io
+      annotations:
+        razee.io/git-repo: "{{{GIT_REMOTE}}}"
+        razee.io/commit-sha: "{{TRAVIS_COMMIT}}"
+    spec:
+      # group name to use for REST API: /apis/<group>/<version>
+      group: kapitan.razee.io
+      # list of versions supported by this CustomResourceDefinition
+      versions:
+        - name: v1alpha1
+          # Each version can be enabled/disabled by Served flag.
+          served: true
+          # One and only one version must be marked as the storage version.
+          storage: true
+      # either Namespaced or Cluster
+      scope: Namespaced
+      names:
+        # plural name to be used in the URL: /apis/<group>/<version>/<plural>
+        plural: s3downloads
+        # singular name to be used as an alias on the CLI and for display
+        singular: s3download
+        # kind is normally the CamelCased singular type. Your resource manifests use this.
+        kind: S3Download
+        # shortNames allow shorter string to match your resource on the CLI
+        shortNames:
+        - s3dl
+      subresources:
+        # status enables the status subresource.
+        status: {}
+      validation:
+        # openAPIV3Schema is the schema for validating custom objects.
+        openAPIV3Schema:
+          properties:
+            spec:
+              type: object
+              required: [requests]
+              properties:
+                auth:
+                  type: object
+                  oneOf:
+                  - type: object
+                    required: [hmac]
+                    properties:
+                      hmac:
+                        type: object
+                        required: [access_key_id, secret_access_key]
+                        properties:
+                          access_key_id:
+                            oneOf:
+                            - type: string
+                            - type: object
+                              required: [valueFrom]
+                              properties:
+                                valueFrom:
+                                  type: object
+                                  required: [secretKeyRef]
+                                  properties:
+                                    secretKeyRef:
+                                      type: object
+                                      required: [name, key]
+                                      properties:
+                                        name:
+                                          type: string
+                                        key:
+                                          type: string
+                          secret_access_key:
+                            oneOf:
+                            - type: string
+                            - type: object
+                              required: [valueFrom]
+                              properties:
+                                valueFrom:
+                                  type: object
+                                  required: [secretKeyRef]
+                                  properties:
+                                    secretKeyRef:
+                                      type: object
+                                      required: [name, key]
+                                      properties:
+                                        name:
+                                          type: string
+                                        key:
+                                          type: string
+                  - type: object
+                    required: [iam]
+                    properties:
+                      iam:
+                        type: object
+                        required: [response_type, grant_type, url, api_key]
+                        properties:
+                          response_type:
+                            type: string
+                          grant_type:
+                            type: string
+                          url:
+                            type: string
+                            format: uri
+                          api_key:
+                            oneOf:
+                            - type: string
+                            - type: object
+                              required: [valueFrom]
+                              properties:
+                                valueFrom:
+                                  type: object
+                                  required: [secretKeyRef]
+                                  properties:
+                                    secretKeyRef:
+                                      type: object
+                                      required: [name, key]
+                                      properties:
+                                        name:
+                                          type: string
+                                        key:
+                                          type: string
+                requests:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      optional:
+                        type: boolean
+                    oneOf:
+                    - type: object
+                      required: [options]
+                      properties:
+                        options:
+                          type: object
+                          required: [url]
+                          properties:
+                            url:
+                              type: string
+                              format: uri
+                    - type: object
+                      required: [options]
+                      properties:
+                        options:
+                          type: object
+                          required: [uri]
+                          properties:
+                            uri:
+                              type: string
+                              format: uri
+                    - type: object
+                      required: [url]
+                      properties:
+                        url:
+                          type: string
+                          format: uri
+                    - type: object
+                      required: [uri]
+                      properties:
+                        uri:
+                          type: string
+                          format: uri
