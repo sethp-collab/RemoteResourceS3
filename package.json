@@ -1,7 +1,7 @@
 {
   "name": "S3Download",
   "version": "0.0.0-dev",
-  "description": "",
+  "description": "Kapitan: component to download and manage files from s3 object storage",
   "main": "src/index.js",
   "keywords": ["kubernetes", "razee", "razeedash", "download", "cos", "s3", "object", "storage"],
   "scripts": {
