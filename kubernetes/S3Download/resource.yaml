@@ -5,14 +5,6 @@ metadata:
   annotations:
     version: "{{TRAVIS_COMMIT}}"
 items:
-  - apiVersion: v1
-    kind: Namespace
-    metadata:
-      name: razee
-      annotations:
-        razee.io/git-repo: "{{{GIT_REMOTE}}}"
-        razee.io/commit-sha: "{{TRAVIS_COMMIT}}"
-
   - apiVersion: apps/v1
     kind: Deployment
     metadata:
@@ -47,6 +39,7 @@ items:
               periodSeconds: 300
               timeoutSeconds: 30
               failureThreshold: 1
+              
   - apiVersion: apiextensions.k8s.io/v1beta1
     kind: CustomResourceDefinition
     metadata:
