@@ -17,11 +17,11 @@
 const objectPath = require('object-path');
 const request = require('request-promise-native');
 const merge = require('deepmerge');
-const log = require('./bunyan-api').createLogger('S3DownloadController');
+const log = require('./bunyan-api').createLogger('RemoteResourceS3Controller');
 const { BaseDownloadController } = require('@razee/kapitan-core');
 
 
-module.exports = class S3DownloadController extends BaseDownloadController {
+module.exports = class RemoteResourceS3Controller extends BaseDownloadController {
   constructor(params) {
     params.finalizerString = params.finalizerString || 'children.downloads.kapitan.razee.io';
     super(params);

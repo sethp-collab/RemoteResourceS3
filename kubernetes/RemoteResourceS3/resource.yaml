@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: List
 metadata:
-  name: s3download-controller-list
+  name: remoteresources3-controller-list
   annotations:
     version: "{{TRAVIS_COMMIT}}"
 items:
   - apiVersion: apps/v1
     kind: Deployment
     metadata:
-      name: s3download-controller
+      name: remoteresources3-controller
       namespace: razee
       annotations:
         razee.io/git-repo: "{{{GIT_REMOTE}}}"
@@ -17,20 +17,20 @@ items:
       replicas: 1
       selector:
         matchLabels:
-          app: s3download-controller
+          app: remoteresources3-controller
       strategy:
         type: RollingUpdate
       template:
         metadata:
           labels:
-            app: s3download-controller
-          name: s3download-controller
+            app: remoteresources3-controller
+          name: remoteresources3-controller
         spec:
           serviceAccountName: kapitan-sa
           containers:
-          - image: "quay.io/razee/s3download:{{TRAVIS_COMMIT}}"
+          - image: "quay.io/razee/remoteresources3:{{TRAVIS_COMMIT}}"
             imagePullPolicy: Always
-            name: s3download-controller
+            name: remoteresources3-controller
             livenessProbe:
               exec:
                 command:
@@ -39,12 +39,12 @@ items:
               periodSeconds: 300
               timeoutSeconds: 30
               failureThreshold: 1
-              
+
   - apiVersion: apiextensions.k8s.io/v1beta1
     kind: CustomResourceDefinition
     metadata:
       # name must match the spec fields below, and be in the form: <plural>.<group>
-      name: s3downloads.kapitan.razee.io
+      name: remoteresourcess3.kapitan.razee.io
       annotations:
         razee.io/git-repo: "{{{GIT_REMOTE}}}"
         razee.io/commit-sha: "{{TRAVIS_COMMIT}}"
@@ -62,14 +62,14 @@ items:
       scope: Namespaced
       names:
         # plural name to be used in the URL: /apis/<group>/<version>/<plural>
-        plural: s3downloads
+        plural: remoteresourcess3
         # singular name to be used as an alias on the CLI and for display
-        singular: s3download
+        singular: remoteresources3
         # kind is normally the CamelCased singular type. Your resource manifests use this.
-        kind: S3Download
+        kind: RemoteResourceS3
         # shortNames allow shorter string to match your resource on the CLI
         shortNames:
-        - s3dl
+        - rrs3
       subresources:
         # status enables the status subresource.
         status: {}

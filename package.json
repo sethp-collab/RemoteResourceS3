@@ -1,5 +1,5 @@
 {
-  "name": "S3Download",
+  "name": "RemoteResourceS3",
   "version": "0.0.0-dev",
   "description": "Kapitan: component to download and manage files from s3 object storage",
   "main": "src/index.js",
@@ -20,17 +20,16 @@
     "check-coverage": "nyc check-coverage --statements 0 --branches 0 --functions 0 --lines 0",
     "lint": "node_modules/.bin/npm-run-all eslint yamllint markdownlint",
     "eslint": "node_modules/.bin/eslint src/",
-    "yamllint": "node_modules/.bin/yamllint .travis.yml kubernetes/S3Download/resource.yaml",
+    "yamllint": "node_modules/.bin/yamllint .travis.yml kubernetes/RemoteResourceS3/resource.yaml",
     "markdownlint": "node_modules/.bin/markdownlint README.md docs/",
     "dockerlint": "node_modules/.bin/dockerlint Dockerfile",
     "commit": "git-cz"
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:razee-io/S3Download.git"
+    "url": "git@github.com:razee-io/RemoteResourceS3.git"
   },
-  "contributors": [
-    {
+  "contributors": [{
       "name": "Alex Lewitt"
     },
     {

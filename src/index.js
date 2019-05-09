@@ -17,7 +17,7 @@
 const { EventHandler, KubeClass, KubeApiConfig } = require('@razee/kubernetes-util');
 const kubeApiConfig = KubeApiConfig();
 
-const ControllerString = 'S3Download';
+const ControllerString = 'RemoteResourceS3';
 const log = require('./bunyan-api').createLogger(ControllerString);
 
 async function main() {
