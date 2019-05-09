@@ -29,7 +29,8 @@
     "type": "git",
     "url": "git@github.com:razee-io/S3Download.git"
   },
-  "contributors": [{
+  "contributors": [
+    {
       "name": "Alex Lewitt"
     },
     {
@@ -41,6 +42,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
+    "@razee/kapitan-core": "0.0.1",
     "@razee/kubernetes-util": "0.0.1",
     "bunyan": "^1.8.12",
     "deepmerge": "^3.2.0",
