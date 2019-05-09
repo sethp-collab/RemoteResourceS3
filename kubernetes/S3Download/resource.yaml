@@ -36,7 +36,7 @@ items:
         spec:
           serviceAccountName: kapitan-sa
           containers:
-          - image: "quay.io/razee/S3Download:{{TRAVIS_COMMIT}}"
+          - image: "quay.io/razee/s3download:{{TRAVIS_COMMIT}}"
             imagePullPolicy: Always
             name: s3download-controller
             livenessProbe:
