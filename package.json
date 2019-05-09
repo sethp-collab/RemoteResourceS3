@@ -20,7 +20,7 @@
     "check-coverage": "nyc check-coverage --statements 0 --branches 0 --functions 0 --lines 0",
     "lint": "node_modules/.bin/npm-run-all eslint yamllint markdownlint",
     "eslint": "node_modules/.bin/eslint src/",
-    "yamllint": "node_modules/.bin/yamllint .travis.yml services/kapitan/deployment.yaml",
+    "yamllint": "node_modules/.bin/yamllint .travis.yml kubernetes/S3Download/resource.yaml",
     "markdownlint": "node_modules/.bin/markdownlint README.md docs/",
     "dockerlint": "node_modules/.bin/dockerlint Dockerfile",
     "commit": "git-cz"
@@ -29,8 +29,7 @@
     "type": "git",
     "url": "git@github.com:razee-io/S3Download.git"
   },
-  "contributors": [
-    {
+  "contributors": [{
       "name": "Alex Lewitt"
     },
     {
