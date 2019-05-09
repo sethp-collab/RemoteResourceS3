@@ -26,7 +26,7 @@ async function main() {
   const kc = new KubeClass(kubeApiConfig);
   let resourceMeta = await kc.getKubeResourceMeta('kapitan.razee.io/v1alpha1', ControllerString, 'watch');
   if (resourceMeta) {
-    const Controller = require(`./controllers/${ControllerString}Controller`);
+    const Controller = require(`./${ControllerString}Controller`);
     let params = {
       kubeResourceMeta: resourceMeta,
       factory: Controller,

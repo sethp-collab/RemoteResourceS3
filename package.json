@@ -3,7 +3,16 @@
   "version": "0.0.0-dev",
   "description": "Kapitan: component to download and manage files from s3 object storage",
   "main": "src/index.js",
-  "keywords": ["kubernetes", "razee", "razeedash", "download", "cos", "s3", "object", "storage"],
+  "keywords": [
+    "kubernetes",
+    "razee",
+    "razeedash",
+    "download",
+    "cos",
+    "s3",
+    "object",
+    "storage"
+  ],
   "scripts": {
     "start": "node src/index.js",
     "test": "nyc --reporter=html --all --reporter=text mocha ",
@@ -20,7 +29,8 @@
     "type": "git",
     "url": "git@github.com:razee-io/S3Download.git"
   },
-  "contributors": [{
+  "contributors": [
+    {
       "name": "Alex Lewitt"
     },
     {
@@ -32,7 +42,11 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-
+    "@razee/kubernetes-util": "0.0.1",
+    "bunyan": "^1.8.12",
+    "deepmerge": "^3.2.0",
+    "object-path": "^0.11.4",
+    "request-promise-native": "^1.0.7"
   },
   "devDependencies": {
     "chai": "^4.2.0",
