@@ -17,7 +17,7 @@
 const objectPath = require('object-path');
 const request = require('request-promise-native');
 const merge = require('deepmerge');
-const log = require('../bunyan-api').createLogger('S3DownloadController');
+const log = require('./bunyan-api').createLogger('S3DownloadController');
 
 const BaseDownloadController = require('./BaseDownloadController');
 
