@@ -29,6 +29,13 @@ items:
           serviceAccountName: kapitan-sa
           containers:
           - image: "quay.io/razee/remoteresources3:{{TRAVIS_COMMIT}}"
+            resources:
+              limits:
+                memory: 200Mi
+                cpu: 100m
+              requests:
+                memory: 75Mi
+                cpu: 40m
             imagePullPolicy: Always
             name: remoteresources3-controller
             livenessProbe:
