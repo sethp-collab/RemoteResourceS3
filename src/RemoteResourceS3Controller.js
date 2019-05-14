@@ -54,16 +54,7 @@ module.exports = class RemoteResourceS3Controller extends BaseDownloadController
     opt.simple = false;
     opt.resolveWithFullResponse = true;
 
-    // TODO capture etag and last-modified and save in controller to send with future calls.
-    // Just add to the object in spec.requests[].headers.If-Modified-Since/If-None-Match
-
-    let res = await request(opt);
-    if (res.statusCode !== 200) {
-      this.log.debug(`Download ${res.statusCode} ${opt.uri || opt.url}`);
-      return Promise.reject({ statusCode: res.statusCode, body: res.body });
-    }
-    log.debug(`Download ${res.statusCode} ${opt.uri || opt.url}`);
-    return res;
+    return await request(opt);
   }
 
   async _fetchS3Token(iam) {
