@@ -34,14 +34,16 @@ module.exports = class RemoteResourceS3Controller extends BaseDownloadController
     if (hmac) {
       if (typeof hmac.access_key_id == 'object') {
         let secretName = objectPath.get(hmac, 'access_key_id.valueFrom.secretKeyRef.name');
+        let secretNamespace = objectPath.get(hmac, 'access_key_id.valueFrom.secretKeyRef.namespace', this.namespace);
         let secretKey = objectPath.get(hmac, 'access_key_id.valueFrom.secretKeyRef.key');
-        hmac.access_key_id = await this._getSecretData(secretName, secretKey);
+        hmac.access_key_id = await this._getSecretData(secretName, secretKey, secretNamespace);
       }
       objectPath.set(options, 'aws.key', hmac.access_key_id);
       if (typeof hmac.secret_access_key == 'object') {
         let secretName = objectPath.get(hmac, 'secret_access_key.valueFrom.secretKeyRef.name');
+        let secretNamespace = objectPath.get(hmac, 'secret_access_key.valueFrom.secretKeyRef.namespace', this.namespace);
         let secretKey = objectPath.get(hmac, 'secret_access_key.valueFrom.secretKeyRef.key');
-        hmac.secret_access_key = await this._getSecretData(secretName, secretKey);
+        hmac.secret_access_key = await this._getSecretData(secretName, secretKey, secretNamespace);
       }
       objectPath.set(options, 'aws.secret', hmac.secret_access_key);
     } else if (iam) {
@@ -61,8 +63,9 @@ module.exports = class RemoteResourceS3Controller extends BaseDownloadController
     let apiKey = objectPath.get(iam, 'api_key', '');
     if (typeof apiKey == 'object') {
       let secretName = objectPath.get(apiKey, 'valueFrom.secretKeyRef.name');
+      let secretNamespace = objectPath.get(apiKey, 'valueFrom.secretKeyRef.namespace', this.namespace);
       let secretKey = objectPath.get(apiKey, 'valueFrom.secretKeyRef.key');
-      apiKey = await this._getSecretData(secretName, secretKey);
+      apiKey = await this._getSecretData(secretName, secretKey, secretNamespace);
     }
     if (apiKey == '') {
       return Promise.reject('Failed to find valid api_key to authenticate against iam');
@@ -80,8 +83,8 @@ module.exports = class RemoteResourceS3Controller extends BaseDownloadController
     return res.access_token;
   }
 
-  async _getSecretData(name, key) {
-    let res = await this.kubeResourceMeta.request({ uri: `/api/v1/namespaces/${this.namespace}/secrets/${name}`, json: true });
+  async _getSecretData(name, key, ns) {
+    let res = await this.kubeResourceMeta.request({ uri: `/api/v1/namespaces/${ns || this.namespace}/secrets/${name}`, json: true });
     let apiKey = Buffer.from(objectPath.get(res, ['data', key], ''), 'base64').toString();
     return apiKey;
   }
