@@ -1,7 +1,7 @@
 {
   "name": "RemoteResourceS3",
   "version": "0.0.0-dev",
-  "description": "Kapitan: component to download and manage files from s3 object storage",
+  "description": "Razeedeploy: component to download and manage files from s3 object storage",
   "main": "src/index.js",
   "keywords": [
     "kubernetes",
@@ -41,8 +41,8 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@razee/kapitan-core": "^0.4.6",
-    "@razee/kubernetes-util": "0.0.6",
+    "@razee/razeedeploy-core": "^0.4.7",
+    "@razee/kubernetes-util": "0.0.7",
     "bunyan": "^1.8.12",
     "deepmerge": "^4.0.0",
     "object-path": "^0.11.4",

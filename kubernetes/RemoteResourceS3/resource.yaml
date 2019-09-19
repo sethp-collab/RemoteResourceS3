@@ -26,7 +26,7 @@ items:
             app: remoteresources3-controller
           name: remoteresources3-controller
         spec:
-          serviceAccountName: kapitan-sa
+          serviceAccountName: razeedeploy-sa
           containers:
           - image: "quay.io/razee/remoteresources3:{{TRAVIS_TAG}}"
             resources:
@@ -50,13 +50,13 @@ items:
             - mountPath: /usr/src/app/download-cache
               name: cache-volume
             - mountPath: /usr/src/app/config
-              name: kapitan-config
+              name: razeedeploy-config
           volumes:
           - name: cache-volume
             emptyDir: {}
-          - name: kapitan-config
+          - name: razeedeploy-config
             configMap:
-              name: kapitan-config
+              name: razeedeploy-config
               defaultMode: 420
               optional: true
 
@@ -64,13 +64,13 @@ items:
     kind: CustomResourceDefinition
     metadata:
       # name must match the spec fields below, and be in the form: <plural>.<group>
-      name: remoteresourcess3.kapitan.razee.io
+      name: remoteresourcess3.deploy.razee.io
       annotations:
         razee.io/git-repo: "{{{GIT_REMOTE}}}"
         razee.io/commit-sha: "{{TRAVIS_COMMIT}}"
     spec:
       # group name to use for REST API: /apis/<group>/<version>
-      group: kapitan.razee.io
+      group: deploy.razee.io
       # list of versions supported by this CustomResourceDefinition
       versions:
         - name: v1alpha1
