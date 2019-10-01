@@ -13,6 +13,7 @@ script:
   - npm test
   - docker build --rm -t "quay.io/razee/remoteresources3:${TRAVIS_COMMIT}" .
   - if [ -n "${TRAVIS_TAG}" ]; then docker tag quay.io/razee/remoteresources3:${TRAVIS_COMMIT} quay.io/razee/remoteresources3:${TRAVIS_TAG}; fi
+  - if [ -n "${TRAVIS_TAG}" ]; then npm version --no-git-tag-version "${TRAVIS_TAG}"; fi
   - docker images
   - ./build/process-template.sh kubernetes/RemoteResourceS3/resource.yaml >/tmp/resource.yaml
 
@@ -49,6 +50,13 @@ deploy:
     skip_cleanup: true
     api_key:
       secure: "${GITHUB_TOKEN}"
+    on:
+      tags: true
+      condition: ${TRAVIS_TAG} =~ ^[0-9]+\.[0-9]+\.[0-9]+$
+  - provider: npm
+    email: "${NPMJS_EMAIL}"
+    api_key: "${NPMJS_API_KEY}"
+    skip_cleanup: true
     on:
       tags: true
       condition: ${TRAVIS_TAG} =~ ^[0-9]+\.[0-9]+\.[0-9]+$

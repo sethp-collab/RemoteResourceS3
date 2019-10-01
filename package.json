@@ -1,8 +1,8 @@
 {
-  "name": "RemoteResourceS3",
+  "name": "@razee/RemoteResourceS3",
   "version": "0.0.0-dev",
   "description": "Razeedeploy: component to download and manage files from s3 object storage",
-  "main": "src/index.js",
+  "main": "main.js",
   "keywords": [
     "kubernetes",
     "razee",
@@ -28,8 +28,7 @@
     "type": "git",
     "url": "git@github.com:razee-io/RemoteResourceS3.git"
   },
-  "contributors": [
-    {
+  "contributors": [{
       "name": "Alex Lewitt"
     },
     {
