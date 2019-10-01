@@ -1,6 +1,6 @@
 {
-  "name": "@razee/RemoteResourceS3",
-  "version": "0.0.0-dev",
+  "name": "@razee/remoteresources3",
+  "version": "0.3.1",
   "description": "Razeedeploy: component to download and manage files from s3 object storage",
   "main": "main.js",
   "keywords": [
