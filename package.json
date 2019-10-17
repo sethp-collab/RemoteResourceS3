@@ -28,7 +28,8 @@
     "type": "git",
     "url": "git@github.com:razee-io/RemoteResourceS3.git"
   },
-  "contributors": [{
+  "contributors": [
+    {
       "name": "Alex Lewitt"
     },
     {
@@ -41,7 +42,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@razee/kubernetes-util": "0.0.7",
-    "@razee/razeedeploy-core": "^0.5.0",
+    "@razee/razeedeploy-core": "^0.5.1",
     "bunyan": "^1.8.12",
     "clone": "^2.1.2",
     "deepmerge": "^4.0.0",
