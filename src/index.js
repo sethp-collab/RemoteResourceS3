@@ -30,7 +30,8 @@ async function createClassicEventHandler(kc) {
       factory: Controller,
       kubeClass: kc,
       logger: log,
-      livenessInterval:true,
+      requestOptions: { qs: { timeoutSeconds: process.env.CRD_WATCH_TIMEOUT_SECONDS || 300 } },
+      livenessInterval: true,
       finalizerString: 'client.featureflagset.kapitan.razee.io'
     };
     result = new EventHandler(params);
@@ -50,7 +51,8 @@ async function createNewEventHandler(kc) {
       factory: Controller,
       kubeClass: kc,
       logger: log,
-      livenessInterval:true
+      requestOptions: { qs: { timeoutSeconds: process.env.CRD_WATCH_TIMEOUT_SECONDS || 300 } },
+      livenessInterval: true
     };
     result = new EventHandler(params);
   } else {
