@@ -45,7 +45,7 @@
     "@razee/razeedeploy-core": "^0.5.2",
     "bunyan": "^1.8.12",
     "clone": "^2.1.2",
-    "deepmerge": "^4.0.0",
+    "deepmerge": "^4.2.0",
     "object-path": "^0.11.4",
     "request-promise-native": "^1.0.7",
     "xml2js": "^0.4.22"
