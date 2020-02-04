@@ -21,7 +21,7 @@ kubectl apply -f "https://github.com/razee-io/RemoteResourceS3/releases/latest/d
 ### Sample
 
 ```yaml
-apiVersion: "deploy.razee.io/v1alpha1"
+apiVersion: "deploy.razee.io/v1alpha2"
 kind: RemoteResourceS3
 metadata:
   name: <remote_resource_s3_name>
@@ -29,13 +29,13 @@ metadata:
 spec:
   auth:
     # hmac:
-    #   access_key_id: <key id>
-    #   secret_access_key: <access key>
+    #   accessKeyId: <key id>
+    #   secretAccessKey: <access key>
     iam:
-      response_type: <provider response type>
-      grant_type: <provider grant type>
+      responseType: <provider response type>
+      grantType: <provider grant type>
       url: <iam auth provider>
-      api_key:
+      apiKeyRef:
         valueFrom:
           secretKeyRef:
             name: <name of secret resource>
@@ -53,108 +53,194 @@ spec:
         url: http://<source_repo_url>/<bucket_path>/
 ```
 
-### Required Fields
+### Spec
 
-- `.spec.auth`
-  - type: object
-  - required: oneOf [[hmac](#HMAC), [iam](#IAM)]
-- `.spec.requests`
-  - type: array
-  - items:
-    - type: object
-    - required: [[options](#Options)]
-    - optional: [[optional](#Optional)]
+**Path:** `.spec`
 
-## Features
+**Description:** `spec` is required and **must** include section `requests`.
+You may also include `auth`, to make connecting to S3 easier.
 
-### Auth
+**Schema:**
 
-#### HMAC
+```yaml
+spec:
+  type: object
+  required: [requests]
+  properties:
+    auth:
+      type: object
+      ...
+    requests:
+      type: array
+      ...
+```
 
-`.spec.auth.hmac`
+### Auth: HMAC
 
-Allows you to connect to s3 buckets using an HMAC key/id pair.
+**Path:** `.spec.auth.hmac`
 
-- Schema
-  - type: object
-  - required: [access_key_id, secret_access_key]
-- Required Fields Schema:
-  - `.spec.auth.hmac.access_key_id`
-    - type: string
-    - or
-    - type: object
-      - required: [valueFrom.secretKeyRef.name, valueFrom.secretKeyRef.key]
-      - optional: [valueFrom.secretKeyRef.namespace]
-  - `.spec.auth.hmac.secret_access_key`
-    - type: string
-    - or
-    - type: object
-      - required: [valueFrom.secretKeyRef.name, valueFrom.secretKeyRef.key]
-      - optional: [valueFrom.secretKeyRef.namespace]
+**Description:** Allows you to connect to s3 buckets using an HMAC key/id pair.
 
-#### IAM
+**Schema:**
 
-`.spec.auth.iam`
+```yaml
+hmac:
+  type: object
+  allOf:
+    - oneOf:
+        - required: [accessKeyId]
+        - required: [accessKeyIdRef]
+    - oneOf:
+        - required: [secretAccessKey]
+        - required: [secretAccessKeyRef]
+  properties:
+    accessKeyId:
+      type: string
+    accessKeyIdRef:
+      type: object
+      required: [valueFrom]
+      properties:
+        valueFrom:
+          type: object
+          required: [secretKeyRef]
+          properties:
+            secretKeyRef:
+              type: object
+              required: [name, key]
+              properties:
+                name:
+                  type: string
+                namespace:
+                  type: string
+                key:
+                  type: string
+    secretAccessKey:
+      type: string
+    secretAccessKeyRef:
+      type: object
+      required: [valueFrom]
+      properties:
+        valueFrom:
+          type: object
+          required: [secretKeyRef]
+          properties:
+            secretKeyRef:
+              type: object
+              required: [name, key]
+              properties:
+                name:
+                  type: string
+                namespace:
+                  type: string
+                key:
+                  type: string
+```
 
-Allows you to connect to s3 buckets using an IAM provider and api key.
+### Auth: IAM
 
-- Schema
-  - type: object
-  - required: [response_type, grant_type, url, api_key]
-  - Sample values for [IBM Cloud Object Storage](https://cloud.ibm.com/docs/services/cloud-object-storage/cli?topic=cloud-object-storage-curl)
-    - response_type: "cloud_iam"
-    - grant_type: "urn:ibm:params:oauth:grant-type:apikey"
-    - url: "[https://iam.cloud.ibm.com/identity/token](https://iam.cloud.ibm.com/identity/token)"
-- Required Fields Schema:
-  - `.spec.auth.iam.response_type`
-    - type: string
-  - `.spec.auth.iam.grant_type`
-    - type: string
-  - `.spec.auth.iam.url`
-    - type: string
-  - `.spec.auth.iam.api_key`
-    - type: string
-    - or
-    - type: object
-      - required: [valueFrom.secretKeyRef.name, valueFrom.secretKeyRef.key]
-      - optional: [valueFrom.secretKeyRef.namespace]
+**Path:** `.spec.auth.iam`
 
-### Requests
+**Description:** Allows you to connect to s3 buckets using an IAM provider and
+api key.
 
-#### Options
+**Schema:**
 
-`.spec.requests.options`
+```yaml
+iam:
+  type: object
+  allOf:
+    - required: [responseType, grantType, url]
+    - oneOf:
+        - required: [apiKey]
+        - required: [apiKeyRef]
+  properties:
+    responseType:
+      type: string
+    grantType:
+      type: string
+    url:
+      type: string
+      format: uri
+    apiKey:
+      type: string
+    apiKeyRef:
+      type: object
+      required: [valueFrom]
+      properties:
+        valueFrom:
+          type: object
+          required: [secretKeyRef]
+          properties:
+            secretKeyRef:
+              type: object
+              required: [name, key]
+              properties:
+                name:
+                  type: string
+                namespace:
+                  type: string
+                key:
+                  type: string
+```
 
-All options defined in an options object will be passed as is to the http request.
-This means you can specify things like headers for authentication in this section.
+**Note:**
 
-- Schema:
-  - type: object
-  - required: [url || uri]
-  - optional: [any other other options to be passed along with the request]
+- Sample values for [IBM Cloud Object Storage](https://cloud.ibm.com/docs/services/cloud-object-storage/cli?topic=cloud-object-storage-curl)
+  - response_type: "cloud_iam"
+  - grant_type: "urn:ibm:params:oauth:grant-type:apikey"
+  - url: "[https://iam.cloud.ibm.com/identity/token](https://iam.cloud.ibm.com/identity/token)"
 
-#### Download Directory Contents
+### Request Options
+
+**Path:** `.spec.requests[].options`
+
+**Description:** All options defined in an options object will be passed as-is
+to the http request. This means you can specify things like headers for
+authentication in this section.
+
+**Schema:**
+
+```yaml
+options:
+  type: object
+  oneOf:
+    - required: [url]
+    - required: [uri]
+  properties:
+    url:
+      type: string
+      format: uri
+    uri:
+      type: string
+      format: uri
+```
+
+### Optional Request
+
+**Path:** `.spec.requests[].optional`
+
+**Description:** if download or applying child resource fails, RemoteResource
+will stop execution and report error to `.status`. You can allow execution to
+continue by marking a reference as optional.
+
+**Schema:**
+
+```yaml
+optional:
+  type: boolean
+```
+
+**Default:** `false`
+
+### Download Directory Contents
 
 - If url/uri ends with `/`, we will assume this is an S3 directory and will attempt
 to download all resources in the directory.
-- Every resource within the directory will be downloaded using the `.spec.requests.options`
+- Every resource within the directory will be downloaded using the `.spec.requests[].options`
 provided with the directory url.
 - Path must follow one of:
   - `http://s3.endpoint.com/bucket/path/to/your/resources/`
   - `http://bucket.s3.endpoint.com/path/to/your/resources/`
-
-#### Optional
-
-`.spec.requests.optional`
-
-- DEFAULT: `false`
-  - if download or applying child resource fails, RemoteResource will stop
-  execution and report error to `.status`.
-- `true`
-  - if download or applying child resource fails, RemoteResource will continue
-  processing the rest of the defined requests, and will report a warning to `.status`.
-- Schema:
-  - type: boolean
 
 ### Managed Resource Labels
 

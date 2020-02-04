@@ -114,20 +114,9 @@ module.exports = class RemoteResourceS3Controller extends BaseDownloadController
     let iam = objectPath.get(this.data, ['object', 'spec', 'auth', 'iam']);
     let options = {};
     if (hmac) {
-      if (typeof hmac.access_key_id == 'object') {
-        let secretName = objectPath.get(hmac, 'access_key_id.valueFrom.secretKeyRef.name');
-        let secretNamespace = objectPath.get(hmac, 'access_key_id.valueFrom.secretKeyRef.namespace', this.namespace);
-        let secretKey = objectPath.get(hmac, 'access_key_id.valueFrom.secretKeyRef.key');
-        hmac.access_key_id = await this._getSecretData(secretName, secretKey, secretNamespace);
-      }
-      objectPath.set(options, 'aws.key', hmac.access_key_id);
-      if (typeof hmac.secret_access_key == 'object') {
-        let secretName = objectPath.get(hmac, 'secret_access_key.valueFrom.secretKeyRef.name');
-        let secretNamespace = objectPath.get(hmac, 'secret_access_key.valueFrom.secretKeyRef.namespace', this.namespace);
-        let secretKey = objectPath.get(hmac, 'secret_access_key.valueFrom.secretKeyRef.key');
-        hmac.secret_access_key = await this._getSecretData(secretName, secretKey, secretNamespace);
-      }
-      objectPath.set(options, 'aws.secret', hmac.secret_access_key);
+      let { accessKeyId, secretAccessKey } = await this._fetchHmacSecrets(hmac);
+      objectPath.set(options, 'aws.key', accessKeyId);
+      objectPath.set(options, 'aws.secret', secretAccessKey);
     } else if (iam) {
       let bearerToken = await this._fetchS3Token(iam);
       objectPath.set(options, 'headers.Authorization', `bearer ${bearerToken}`);
@@ -141,22 +130,88 @@ module.exports = class RemoteResourceS3Controller extends BaseDownloadController
     return await request(opt);
   }
 
+  async _fetchHmacSecrets(hmac) {
+    let akid;
+    let akidAlpha1 = objectPath.get(hmac, 'access_key_id');
+    let akidStr = objectPath.get(hmac, 'accessKeyId');
+    let akidRef = objectPath.get(hmac, 'accessKeyIdRef');
+
+    if (typeof akidAlpha1 == 'string') {
+      akid = akidAlpha1;
+    } else if (typeof akidStr == 'string') {
+      akid = akidStr;
+    } else if (typeof akidAlpha1 == 'object') {
+      let secretName = objectPath.get(akidAlpha1, 'valueFrom.secretKeyRef.name');
+      let secretNamespace = objectPath.get(akidAlpha1, 'valueFrom.secretKeyRef.namespace', this.namespace);
+      let secretKey = objectPath.get(akidAlpha1, 'valueFrom.secretKeyRef.key');
+      akid = await this._getSecretData(secretName, secretKey, secretNamespace);
+    } else if (typeof akidRef == 'object') {
+      let secretName = objectPath.get(akidRef, 'valueFrom.secretKeyRef.name');
+      let secretNamespace = objectPath.get(akidRef, 'valueFrom.secretKeyRef.namespace', this.namespace);
+      let secretKey = objectPath.get(akidRef, 'valueFrom.secretKeyRef.key');
+      akid = await this._getSecretData(secretName, secretKey, secretNamespace);
+    }
+    if (!akid) {
+      throw Error('Must have an access key id when using HMAC');
+    }
+
+    let sak;
+    let sakAlpha1 = objectPath.get(hmac, 'secret_access_key');
+    let sakStr = objectPath.get(hmac, 'secretAccessKey');
+    let sakRef = objectPath.get(hmac, 'secretAccessKeyRef');
+
+    if (typeof sakAlpha1 == 'string') {
+      sak = sakAlpha1;
+    } else if (typeof sakStr == 'string') {
+      sak = sakStr;
+    } else if (typeof sakAlpha1 == 'object') {
+      let secretName = objectPath.get(sakAlpha1, 'valueFrom.secretKeyRef.name');
+      let secretNamespace = objectPath.get(sakAlpha1, 'valueFrom.secretKeyRef.namespace', this.namespace);
+      let secretKey = objectPath.get(sakAlpha1, 'valueFrom.secretKeyRef.key');
+      sak = await this._getSecretData(secretName, secretKey, secretNamespace);
+    } else if (typeof sakRef == 'object') {
+      let secretName = objectPath.get(sakRef, 'valueFrom.secretKeyRef.name');
+      let secretNamespace = objectPath.get(sakRef, 'valueFrom.secretKeyRef.namespace', this.namespace);
+      let secretKey = objectPath.get(sakRef, 'valueFrom.secretKeyRef.key');
+      sak = await this._getSecretData(secretName, secretKey, secretNamespace);
+    }
+    if (!sak) {
+      throw Error('Must have a secret access key when using HMAC');
+    }
+
+    return { accessKeyId: akid, secretAccessKey: sak };
+  }
+
   async _fetchS3Token(iam) {
-    let apiKey = objectPath.get(iam, 'api_key', '');
-    if (typeof apiKey == 'object') {
-      let secretName = objectPath.get(apiKey, 'valueFrom.secretKeyRef.name');
-      let secretNamespace = objectPath.get(apiKey, 'valueFrom.secretKeyRef.namespace', this.namespace);
-      let secretKey = objectPath.get(apiKey, 'valueFrom.secretKeyRef.key');
+    let apiKey;
+    let apiKeyAlpha1 = objectPath.get(iam, 'api_key');
+    let apiKeyStr = objectPath.get(iam, 'apiKey');
+    let apiKeyRef = objectPath.get(iam, 'apiKeyRef');
+
+    if (typeof apiKeyAlpha1 == 'string') {
+      apiKey = apiKeyAlpha1;
+    } else if (typeof apiKeyStr == 'string') {
+      apiKey = apiKeyStr;
+    } else if (typeof apiKeyAlpha1 == 'object') {
+      let secretName = objectPath.get(apiKeyAlpha1, 'valueFrom.secretKeyRef.name');
+      let secretNamespace = objectPath.get(apiKeyAlpha1, 'valueFrom.secretKeyRef.namespace', this.namespace);
+      let secretKey = objectPath.get(apiKeyAlpha1, 'valueFrom.secretKeyRef.key');
+      apiKey = await this._getSecretData(secretName, secretKey, secretNamespace);
+    } else if (typeof apiKeyRef == 'object') {
+      let secretName = objectPath.get(apiKeyRef, 'valueFrom.secretKeyRef.name');
+      let secretNamespace = objectPath.get(apiKeyRef, 'valueFrom.secretKeyRef.namespace', this.namespace);
+      let secretKey = objectPath.get(apiKeyRef, 'valueFrom.secretKeyRef.key');
       apiKey = await this._getSecretData(secretName, secretKey, secretNamespace);
     }
-    if (apiKey == '') {
-      return Promise.reject('Failed to find valid api_key to authenticate against iam');
+    if (!apiKey) {
+      return Promise.reject('Failed to find valid apikey to authenticate against iam');
     }
+
     let res = await request.post({
       form: {
         apikey: apiKey,
-        response_type: iam.response_type,
-        grant_type: iam.grant_type
+        response_type: iam.responseType || iam.response_type,
+        grant_type: iam.grantType || iam.grant_type
       },
       timeout: 60000,
       url: iam.url,
