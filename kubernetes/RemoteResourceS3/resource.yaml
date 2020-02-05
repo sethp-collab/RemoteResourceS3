@@ -167,7 +167,7 @@ items:
                       properties:
                         hmac:
                           type: object
-                          # remove when v1alpha1 is depricated
+                          # remove when v1alpha1 is depricated - this one allows for 'access_key_id' and 'secret_access_key'
                           x-kubernetes-preserve-unknown-fields: true
                           allOf:
                             - oneOf:
@@ -219,7 +219,7 @@ items:
                                           type: string
                         iam:
                           type: object
-                          # remove when v1alpha1 is depricated
+                          # remove when v1alpha1 is depricated - this one allows for 'api_key', 'response_type', and 'grant_type'
                           x-kubernetes-preserve-unknown-fields: true
                           allOf:
                             - required: [responseType, grantType, url]
