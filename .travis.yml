@@ -47,6 +47,7 @@ deploy:
   - provider: npm
     email: "${NPMJS_EMAIL}"
     api_key: "${NPMJS_API_KEY}"
+    name: "${TRAVIS_TAG}"
     skip_cleanup: true
     on:
       tags: true
