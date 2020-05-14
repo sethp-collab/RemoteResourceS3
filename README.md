@@ -213,6 +213,9 @@ options:
     uri:
       type: string
       format: uri
+    headers:
+      type: object
+      x-kubernetes-preserve-unknown-fields: true
 ```
 
 ### Optional Request
