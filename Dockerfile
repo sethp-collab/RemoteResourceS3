@@ -15,7 +15,6 @@
 ################################################################################
 
 FROM node:alpine as buildImg
-
 RUN apk update
 RUN apk --no-cache add gnupg python make curl
 
@@ -28,6 +27,10 @@ RUN npm install --production --loglevel=warn
 
 
 FROM node:alpine
+ARG GROUP_ARG
+ARG VERSION_ARG
+ENV GROUP=$GROUP_ARG
+ENV VERSION=$VERSION_ARG
 RUN apk add --upgrade --no-cache libssl1.1
 RUN mkdir -p /usr/src/app
 ENV PATH="$PATH:/usr/src/app"

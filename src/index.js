@@ -20,30 +20,12 @@ const kubeApiConfig = KubeApiConfig();
 const ControllerString = 'RemoteResourceS3';
 const log = require('./bunyan-api').createLogger(ControllerString);
 
-async function createClassicEventHandler(kc) {
-  let result;
-  let resourceMeta = await kc.getKubeResourceMeta('kapitan.razee.io/v1alpha1', ControllerString, 'watch');
-  if (resourceMeta) {
-    const Controller = require(`./${ControllerString}Controller`);
-    let params = {
-      kubeResourceMeta: resourceMeta,
-      factory: Controller,
-      kubeClass: kc,
-      logger: log,
-      requestOptions: { qs: { timeoutSeconds: process.env.CRD_WATCH_TIMEOUT_SECONDS || 300 } },
-      livenessInterval: true,
-      finalizerString: 'client.featureflagset.kapitan.razee.io'
-    };
-    result = new EventHandler(params);
-  } else {
-    log.info(`Unable to find KubeResourceMeta for kapitan.razee.io/v1alpha1: ${ControllerString}`);
-  }
-  return result;
-}
+const apiGroup = process.env.GROUP;
+const apiVersion = process.env.VERSION;
 
 async function createNewEventHandler(kc) {
   let result;
-  let resourceMeta = await kc.getKubeResourceMeta('deploy.razee.io/v1alpha1', ControllerString, 'watch');
+  let resourceMeta = await kc.getKubeResourceMeta(`${apiGroup}/${apiVersion}`, ControllerString, 'watch');
   if (resourceMeta) {
     const Controller = require(`./${ControllerString}Controller`);
     let params = {
@@ -56,16 +38,17 @@ async function createNewEventHandler(kc) {
     };
     result = new EventHandler(params);
   } else {
-    log.error(`Unable to find KubeResourceMeta for deploy.razee.io/v1alpha1: ${ControllerString}`);
+    log.error(`Unable to find KubeResourceMeta for ${apiGroup}/${apiVersion}: ${ControllerString}`);
   }
   return result;
 }
 
 async function main() {
   log.info(`Running ${ControllerString}Controller.`);
+  log.info(`apiGroud ${apiGroup}`);
+  log.info(`apiVersion ${apiVersion}`);
   const kc = new KubeClass(kubeApiConfig);
   const eventHandlers = [];
-  eventHandlers.push(createClassicEventHandler(kc));
   eventHandlers.push(createNewEventHandler(kc));
   return eventHandlers;
 }
