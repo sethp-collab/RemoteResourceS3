@@ -20,10 +20,11 @@ const kubeApiConfig = KubeApiConfig();
 const ControllerString = 'RemoteResourceS3';
 const log = require('./bunyan-api').createLogger(ControllerString);
 
-const apiGroup = process.env.GROUP;
-const apiVersion = process.env.VERSION;
+const apiGroup = process.env.GROUP || 'deploy.razee.io';
+const apiVersion = process.env.VERSION || 'v1alpha2';
 
 async function createNewEventHandler(kc) {
+  log.info(`Starting EventHandler for ${apiGroup}/${apiVersion}: ${ControllerString}`);
   let result;
   let resourceMeta = await kc.getKubeResourceMeta(`${apiGroup}/${apiVersion}`, ControllerString, 'watch');
   if (resourceMeta) {
@@ -45,8 +46,6 @@ async function createNewEventHandler(kc) {
 
 async function main() {
   log.info(`Running ${ControllerString}Controller.`);
-  log.info(`apiGroud ${apiGroup}`);
-  log.info(`apiVersion ${apiVersion}`);
   const kc = new KubeClass(kubeApiConfig);
   const eventHandlers = [];
   eventHandlers.push(createNewEventHandler(kc));

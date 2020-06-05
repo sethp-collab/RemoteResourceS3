@@ -46,6 +46,10 @@ items:
                     name: razeedeploy-overrides
                     key: CRD_WATCH_TIMEOUT_SECONDS
                     optional: true
+              - name: GROUP
+                value: {{GROUP}}
+              - name: VERSION
+                value: {{VERSION}}
             imagePullPolicy: Always
             name: remoteresources3-controller
             livenessProbe:
@@ -96,51 +100,7 @@ items:
               properties:
                 spec:
                   type: object
-                  required: [requests]
-                  properties:
-                    auth:
-                      type: object
-                      oneOf:
-                        - required: [hmac]
-                        - required: [iam]
-                      properties:
-                        hmac:
-                          type: object
-                          x-kubernetes-preserve-unknown-fields: true
-                        iam:
-                          type: object
-                          x-kubernetes-preserve-unknown-fields: true
-                          properties:
-                            response_type:
-                              type: string
-                            grant_type:
-                              type: string
-                            url:
-                              type: string
-                              format: uri
-                    requests:
-                      type: array
-                      items:
-                        type: object
-                        required: [options]
-                        properties:
-                          optional:
-                            type: boolean
-                          options:
-                            type: object
-                            oneOf:
-                              - required: [url]
-                              - required: [uri]
-                            properties:
-                              url:
-                                type: string
-                                format: uri
-                              uri:
-                                type: string
-                                format: uri
-                              headers:
-                                type: object
-                                x-kubernetes-preserve-unknown-fields: true
+                  x-kubernetes-preserve-unknown-fields: true
                 status:
                   type: object
                   x-kubernetes-preserve-unknown-fields: true
@@ -167,15 +127,15 @@ items:
                       properties:
                         hmac:
                           type: object
-                          # remove when v1alpha1 is depricated - this one allows for 'access_key_id' and 'secret_access_key'
-                          x-kubernetes-preserve-unknown-fields: true
                           allOf:
                             - oneOf:
                                 - required: [accessKeyId]
                                 - required: [accessKeyIdRef]
+                                - required: [access_key_id] # remove when v1alpha1 is depricated
                             - oneOf:
                                 - required: [secretAccessKey]
                                 - required: [secretAccessKeyRef]
+                                - required: [secret_access_key] # remove when v1alpha1 is depricated
                           properties:
                             accessKeyId:
                               type: string
@@ -219,13 +179,18 @@ items:
                                           type: string
                         iam:
                           type: object
-                          # remove when v1alpha1 is depricated - this one allows for 'api_key', 'response_type', and 'grant_type'
-                          x-kubernetes-preserve-unknown-fields: true
                           allOf:
-                            - required: [responseType, grantType, url]
+                            - required: [url]
+                            - oneOf:
+                                - required: [responseType]
+                                - required: [response_type] # remove when v1alpha1 is depricated
+                            - oneOf:
+                                - required: [grantType]
+                                - required: [grant_type] # remove when v1alpha1 is depricated
                             - oneOf:
                                 - required: [apiKey]
                                 - required: [apiKeyRef]
+                                - required: [api_key] # remove when v1alpha1 is depricated
                           properties:
                             responseType:
                               type: string
