@@ -26,7 +26,7 @@ jobs:
        - ./build/process-template.sh kubernetes/RemoteResourceS3/resource.yaml >/tmp/resource.yaml
        #Start test push
        - docker login -u="${QUAY_ID}" -p="${QUAY_TOKEN}" quay.io
-       - docker push "quay.io/seth_priya/multi-arch-travis:${TRAVIS_TAG}-amd64"
+       - docker push "quay.io/seth_priya/multi-arch-travis:${TRAVIS_COMMIT}-amd64"
        #End test push
      
      before_deploy:
@@ -76,7 +76,7 @@ jobs:
        - ./build/process-template.sh kubernetes/RemoteResourceS3/resource.yaml >/tmp/resource.yaml
        #Start test push
        - docker login -u="${QUAY_ID}" -p="${QUAY_TOKEN}" quay.io
-       - docker push "quay.io/seth_priya/multi-arch-travis:${TRAVIS_TAG}-ppc64le"
+       - docker push "quay.io/seth_priya/multi-arch-travis:${TRAVIS_COMMIT}-ppc64le"
        #End test push
        
      before_deploy:
@@ -117,8 +117,10 @@ jobs:
    - stage: build and push multi-arch image
      arch: ppc64le
      script:
+       #Test Manifest Push
        - export DOCKER_CLI_EXPERIMENTAL=enabled
-       - docker manifest create quay.io/seth_priya/multi-arch-travis:latest quay.io/seth_priya/multi-arch-travis:x86_64 quay.io/seth_priya/multi-arch-travis:ppc64le
+       - docker manifest create quay.io/seth_priya/multi-arch-travis:latest quay.io/seth_priya/multi-arch-travis:${TRAVIS_COMMIT}-amd64 quay.io/seth_priya/multi-arch-travis:${TRAVIS_COMMIT}-ppc64le
        - docker manifest inspect quay.io/seth_priya/multi-arch-travis
        - docker login -u="${QUAY_ID}" -p="${QUAY_TOKEN}" quay.io
        - docker manifest push quay.io/seth_priya/multi-arch-travis:latest
+      #End Manifest Push
