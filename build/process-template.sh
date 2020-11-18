@@ -16,6 +16,8 @@
 ################################################################################
 set -e
 
+sudo apt-get install -y gettext-base
+
 FILE="${1}"
 THIS_DIR=$(dirname "${BASH_SOURCE[0]}")
 TRAVIS_COMMIT="${TRAVIS_COMMIT:=$(git rev-parse HEAD)}"
