@@ -12,61 +12,99 @@ env:
 
 jobs:
   include:
-   - stage: building x86_64 image
+   - stage: build and push amd64 image
      arch: amd64
      script:
      # Audit npm packages. Fail build whan a PR audit fails, otherwise report the vulnerability and proceed.
        - if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then npm audit; else npm audit || true; fi
        - npm run lint
        - npm test
-       - docker build --rm -t "quay.io/razee/remoteresources3:${TRAVIS_COMMIT}" .
-       - if [ -n "${TRAVIS_TAG}" ]; then docker tag quay.io/razee/remoteresources3:${TRAVIS_COMMIT} quay.io/razee/remoteresources3:${TRAVIS_TAG}-amd64; fi
+       - docker build --rm -t "quay.io/seth_priya/multi-arch-travis:${TRAVIS_COMMIT}-amd64" .
+       - if [ -n "${TRAVIS_TAG}" ]; then docker tag quay.io/seth_priya/multi-arch-travis:${TRAVIS_COMMIT}-amd64 quay.io/seth_priya/multi-arch-travis:${TRAVIS_TAG}-amd64; fi
        - if [[ $TRAVIS_TAG =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then npm version --no-git-tag-version "${TRAVIS_TAG}"; fi
        - docker images
        - ./build/process-template.sh kubernetes/RemoteResourceS3/resource.yaml >/tmp/resource.yaml
+     before_deploy:
+     - docker login -u="${QUAY_ID}" -p="${QUAY_TOKEN}" quay.io
+     deploy:
+     # Deploy alpha builds
+     - provider: script
+       script: docker push "quay.io/seth_priya/multi-arch-travis:${TRAVIS_TAG}-amd64"
+       skip_cleanup: true
+       on:
+         tags: true
+         condition: ${TRAVIS_TAG} =~ ^[0-9]+\.[0-9]+\.[0-9]+_[0-9]{3}$
+
+     # Deploy released builds
+     - provider: script
+       script: docker push "quay.io/seth_priya/multi-arch-travis:${TRAVIS_TAG}-amd64"
+       skip_cleanup: true
+       on:
+         tags: true
+         condition: ${TRAVIS_TAG} =~ ^[0-9]+\.[0-9]+\.[0-9]+$
+     - provider: releases
+       file: /tmp/resource.yaml
+       skip_cleanup: true
+       api_key: "${GITHUB_TOKEN}"
+       on:
+         tags: true
+         condition: ${TRAVIS_TAG} =~ ^[0-9]+\.[0-9]+\.[0-9]+$
+    - provider: npm
+      email: "${NPMJS_EMAIL}"
+      api_key: "${NPMJS_API_KEY}"
+      name: "${TRAVIS_TAG}"
+      skip_cleanup: true
+      on:
+        tags: true
+        condition: ${TRAVIS_TAG} =~ ^[0-9]+\.[0-9]+\.[0-9]+$      
    - stage: building ppc64le image
      arch: ppc64le
      script:
      # Audit npm packages. Fail build whan a PR audit fails, otherwise report the vulnerability and proceed.
        - if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then npm audit; else npm audit || true; fi
-       - npm run lint
+       - npm run lint-ppc64le
        - npm test
-       - docker build --rm -t "quay.io/razee/remoteresources3:${TRAVIS_COMMIT}" .
-       - if [ -n "${TRAVIS_TAG}" ]; then docker tag quay.io/razee/remoteresources3:${TRAVIS_COMMIT} quay.io/razee/remoteresources3:${TRAVIS_TAG}-ppc64le; fi
+       - docker build --rm -t "quay.io/seth_priya/multi-arch-travis:${TRAVIS_COMMIT}-ppc64le" .
+       - if [ -n "${TRAVIS_TAG}" ]; then docker tag quay.io/seth_priya/multi-arch-travis:${TRAVIS_COMMIT}-ppc64le quay.io/seth_priya/multi-arch-travis:${TRAVIS_TAG}-ppc64le; fi
        - if [[ $TRAVIS_TAG =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then npm version --no-git-tag-version "${TRAVIS_TAG}"; fi
        - docker images
        - ./build/process-template.sh kubernetes/RemoteResourceS3/resource.yaml >/tmp/resource.yaml
-before_deploy:
-  - docker login -u="${QUAY_ID}" -p="${QUAY_TOKEN}" quay.io
+     before_deploy:
+     - docker login -u="${QUAY_ID}" -p="${QUAY_TOKEN}" quay.io
+     deploy:
+     # Deploy alpha builds
+     - provider: script
+       script: docker push "quay.io/seth_priya/multi-arch-travis:${TRAVIS_TAG}-ppc64le"
+       skip_cleanup: true
+       on:
+         tags: true
+         condition: ${TRAVIS_TAG} =~ ^[0-9]+\.[0-9]+\.[0-9]+_[0-9]{3}$
 
-deploy:
-  # Deploy alpha builds
-  - provider: script
-    script: docker push "quay.io/razee/remoteresources3:${TRAVIS_TAG}"
-    skip_cleanup: true
-    on:
-      tags: true
-      condition: ${TRAVIS_TAG} =~ ^[0-9]+\.[0-9]+\.[0-9]+_[0-9]{3}$
-
-  # Deploy released builds
-  - provider: script
-    script: docker push "quay.io/razee/remoteresources3:${TRAVIS_TAG}"
-    skip_cleanup: true
-    on:
-      tags: true
-      condition: ${TRAVIS_TAG} =~ ^[0-9]+\.[0-9]+\.[0-9]+$
-  - provider: releases
-    file: /tmp/resource.yaml
-    skip_cleanup: true
-    api_key: "${GITHUB_TOKEN}"
-    on:
-      tags: true
-      condition: ${TRAVIS_TAG} =~ ^[0-9]+\.[0-9]+\.[0-9]+$
-  - provider: npm
-    email: "${NPMJS_EMAIL}"
-    api_key: "${NPMJS_API_KEY}"
-    name: "${TRAVIS_TAG}"
-    skip_cleanup: true
-    on:
-      tags: true
-      condition: ${TRAVIS_TAG} =~ ^[0-9]+\.[0-9]+\.[0-9]+$
+     # Deploy released builds
+     - provider: script
+       script: docker push "quay.io/seth_priya/multi-arch-travis:${TRAVIS_TAG}-ppc64le"
+       skip_cleanup: true
+       on:
+         tags: true
+         condition: ${TRAVIS_TAG} =~ ^[0-9]+\.[0-9]+\.[0-9]+$
+     - provider: releases
+       file: /tmp/resource.yaml
+       skip_cleanup: true
+       api_key: "${GITHUB_TOKEN}"
+       on:
+         tags: true
+         condition: ${TRAVIS_TAG} =~ ^[0-9]+\.[0-9]+\.[0-9]+$
+    - provider: npm
+      email: "${NPMJS_EMAIL}"
+      api_key: "${NPMJS_API_KEY}"
+      name: "${TRAVIS_TAG}"
+      skip_cleanup: true
+      on:
+        tags: true
+        condition: ${TRAVIS_TAG} =~ ^[0-9]+\.[0-9]+\.[0-9]+$
+   - stage: build and push multi-arch image
+     arch: ppc64le
+     script:
+       - docker manifest create quay.io/seth_priya/multi-arch-travis:latest quay.io/seth_priya/multi-arch-travis:x86_64 quay.io/seth_priya/multi-arch-travis:ppc64le
+       - docker manifest inspect quay.io/seth_priya/multi-arch-travis
+       
