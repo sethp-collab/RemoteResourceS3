@@ -109,5 +109,6 @@ jobs:
    - stage: build and push multi-arch image
      arch: ppc64le
      script:
+       - export DOCKER_CLI_EXPERIMENTAL=enabled
        - docker manifest create quay.io/seth_priya/multi-arch-travis:latest quay.io/seth_priya/multi-arch-travis:x86_64 quay.io/seth_priya/multi-arch-travis:ppc64le
        - docker manifest inspect quay.io/seth_priya/multi-arch-travis
