@@ -33,9 +33,9 @@ jobs:
        - provider: script
          script: docker push "quay.io/seth_priya/multi-arch-travis:${TRAVIS_TAG}-amd64"
          skip_cleanup: true
-         on:
-           tags: true
-           condition: ${TRAVIS_TAG} =~ ^[0-9]+\.[0-9]+\.[0-9]+_[0-9]{3}$
+         #on:
+         #  tags: true
+         #  condition: ${TRAVIS_TAG} =~ ^[0-9]+\.[0-9]+\.[0-9]+_[0-9]{3}$
 
        # Deploy released builds
        - provider: script
@@ -80,9 +80,9 @@ jobs:
        - provider: script
          script: docker push "quay.io/seth_priya/multi-arch-travis:${TRAVIS_TAG}-ppc64le"
          skip_cleanup: true
-         on:
-           tags: true
-           condition: ${TRAVIS_TAG} =~ ^[0-9]+\.[0-9]+\.[0-9]+_[0-9]{3}$
+         #on:
+         #  tags: true
+         #  condition: ${TRAVIS_TAG} =~ ^[0-9]+\.[0-9]+\.[0-9]+_[0-9]{3}$
 
        # Deploy released builds
        - provider: script
@@ -112,3 +112,5 @@ jobs:
        - export DOCKER_CLI_EXPERIMENTAL=enabled
        - docker manifest create quay.io/seth_priya/multi-arch-travis:latest quay.io/seth_priya/multi-arch-travis:x86_64 quay.io/seth_priya/multi-arch-travis:ppc64le
        - docker manifest inspect quay.io/seth_priya/multi-arch-travis
+       - docker login -u="${QUAY_ID}" -p="${QUAY_TOKEN}" quay.io
+       - docker manifest push quay.io/seth_priya/multi-arch-travis:latest
