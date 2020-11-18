@@ -51,14 +51,14 @@ jobs:
          on:
            tags: true
            condition: ${TRAVIS_TAG} =~ ^[0-9]+\.[0-9]+\.[0-9]+$
-      - provider: npm
-        email: "${NPMJS_EMAIL}"
-        api_key: "${NPMJS_API_KEY}"
-        name: "${TRAVIS_TAG}"
-        skip_cleanup: true
-        on:
-          tags: true
-          condition: ${TRAVIS_TAG} =~ ^[0-9]+\.[0-9]+\.[0-9]+$      
+       - provider: npm
+         email: "${NPMJS_EMAIL}"
+         api_key: "${NPMJS_API_KEY}"
+         name: "${TRAVIS_TAG}"
+         skip_cleanup: true
+         on:
+           tags: true
+           condition: ${TRAVIS_TAG} =~ ^[0-9]+\.[0-9]+\.[0-9]+$      
    - stage: building ppc64le image
      arch: ppc64le
      script:
@@ -91,24 +91,23 @@ jobs:
          on:
            tags: true
            condition: ${TRAVIS_TAG} =~ ^[0-9]+\.[0-9]+\.[0-9]+$
-      - provider: releases
-        file: /tmp/resource.yaml
+       - provider: releases
+         file: /tmp/resource.yaml
          skip_cleanup: true
          api_key: "${GITHUB_TOKEN}"
          on:
            tags: true
            condition: ${TRAVIS_TAG} =~ ^[0-9]+\.[0-9]+\.[0-9]+$
-      - provider: npm
-        email: "${NPMJS_EMAIL}"
-        api_key: "${NPMJS_API_KEY}"
-        name: "${TRAVIS_TAG}"
-        skip_cleanup: true
-        on:
-          tags: true
-          condition: ${TRAVIS_TAG} =~ ^[0-9]+\.[0-9]+\.[0-9]+$
+       - provider: npm
+         email: "${NPMJS_EMAIL}"
+         api_key: "${NPMJS_API_KEY}"
+         name: "${TRAVIS_TAG}"
+         skip_cleanup: true
+         on:
+           tags: true
+           condition: ${TRAVIS_TAG} =~ ^[0-9]+\.[0-9]+\.[0-9]+$
    - stage: build and push multi-arch image
      arch: ppc64le
      script:
        - docker manifest create quay.io/seth_priya/multi-arch-travis:latest quay.io/seth_priya/multi-arch-travis:x86_64 quay.io/seth_priya/multi-arch-travis:ppc64le
        - docker manifest inspect quay.io/seth_priya/multi-arch-travis
-    
