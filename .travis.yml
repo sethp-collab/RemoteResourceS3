@@ -12,7 +12,7 @@ env:
 
 jobs:
   include:
-   - stage: build and push amd64 image
+   - stage: building amd64 image
      arch: amd64
      script:
        # Audit npm packages. Fail build whan a PR audit fails, otherwise report the vulnerability and proceed.
@@ -24,7 +24,7 @@ jobs:
        - if [[ $TRAVIS_TAG =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then npm version --no-git-tag-version "${TRAVIS_TAG}"; fi
        - docker images
        - ./build/process-template.sh kubernetes/RemoteResourceS3/resource.yaml >/tmp/resource.yaml
-       #Start test push
+       #Start test push amd64 image
        - docker login -u="${QUAY_ID}" -p="${QUAY_TOKEN}" quay.io
        - docker push "quay.io/seth_priya/multi-arch-travis:${TRAVIS_COMMIT}-amd64"
        #End test push
@@ -89,8 +89,7 @@ jobs:
          skip_cleanup: true
          on:
            tags: true
-           condition: true
-         #  condition: ${TRAVIS_TAG} =~ ^[0-9]+\.[0-9]+\.[0-9]+_[0-9]{3}$
+           condition: ${TRAVIS_TAG} =~ ^[0-9]+\.[0-9]+\.[0-9]+_[0-9]{3}$
 
        # Deploy released builds
        - provider: script
@@ -117,10 +116,31 @@ jobs:
    - stage: build and push multi-arch image
      arch: ppc64le
      script:
+       - export DOCKER_CLI_EXPERIMENTAL=enabled    
+       - if [ -n "${TRAVIS_TAG}" ]; then docker manifest create quay.io/seth_priya/multi-arch-travis:${TRAVIS_TAG} quay.io/seth_priya/multi-arch-travis:${TRAVIS_TAG}-amd64 quay.io/seth_priya/multi-arch-travis:${TRAVIS_TAG}-ppc64le; fi       
        #Test Manifest Push
-       - export DOCKER_CLI_EXPERIMENTAL=enabled
-       - docker manifest create quay.io/seth_priya/multi-arch-travis:latest quay.io/seth_priya/multi-arch-travis:${TRAVIS_COMMIT}-amd64 quay.io/seth_priya/multi-arch-travis:${TRAVIS_COMMIT}-ppc64le
-       - docker manifest inspect quay.io/seth_priya/multi-arch-travis
+       - docker manifest create quay.io/seth_priya/multi-arch-travis:${TRAVIS_COMMIT} quay.io/seth_priya/multi-arch-travis:${TRAVIS_COMMIT}-amd64 quay.io/seth_priya/multi-arch-travis:${TRAVIS_COMMIT}-ppc64le
+       - docker manifest inspect quay.io/seth_priya/multi-arch-travis:${TRAVIS_COMMIT}
        - docker login -u="${QUAY_ID}" -p="${QUAY_TOKEN}" quay.io
-       - docker manifest push quay.io/seth_priya/multi-arch-travis:latest
-      #End Manifest Push
+       - docker manifest push quay.io/seth_priya/multi-arch-travis:${TRAVIS_COMMIT}
+      #End Test Manifest Push
+      
+     before_deploy:
+       - docker login -u="${QUAY_ID}" -p="${QUAY_TOKEN}" quay.io
+       
+     deploy:
+       # Deploy alpha builds
+       - provider: script
+         script: docker push "quay.io/seth_priya/multi-arch-travis:${TRAVIS_TAG}"
+         skip_cleanup: true
+         on:
+           tags: true
+           condition: ${TRAVIS_TAG} =~ ^[0-9]+\.[0-9]+\.[0-9]+_[0-9]{3}$
+
+       # Deploy released builds
+       - provider: script
+         script: docker push "quay.io/seth_priya/multi-arch-travis:${TRAVIS_TAG}"
+         skip_cleanup: true
+         on:
+           tags: true
+           condition: ${TRAVIS_TAG} =~ ^[0-9]+\.[0-9]+\.[0-9]+$
