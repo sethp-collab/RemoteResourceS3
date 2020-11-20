@@ -10,6 +10,7 @@ env:
   global:
     - GROUP=deploy.razee.io
     - VERSION=v1alpha2
+    - DOCKER_CLI_EXPERIMENTAL=enabled
 
 script:
   # Audit npm packages. Fail build whan a PR audit fails, otherwise report the vulnerability and proceed.
