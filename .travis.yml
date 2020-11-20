@@ -3,14 +3,18 @@ language: node_js
 node_js:
   - "lts/*"
 
-services:
-  - docker
-
 env:
   global:
     - GROUP=deploy.razee.io
     - VERSION=v1alpha2
     - DOCKER_CLI_EXPERIMENTAL=enabled
+    
+before_install:
+  - curl -fsSL https://get.docker.com | sh
+  - echo '{"experimental":"enabled"}' | sudo tee /etc/docker/daemon.json
+  - mkdir -p $HOME/.docker
+  - echo '{"experimental":"enabled"}' | sudo tee $HOME/.docker/config.json
+  - sudo service docker start
 
 script:
   # Audit npm packages. Fail build whan a PR audit fails, otherwise report the vulnerability and proceed.
