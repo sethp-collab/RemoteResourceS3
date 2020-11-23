@@ -20,6 +20,7 @@ script:
   # Audit npm packages. Fail build whan a PR audit fails, otherwise report the vulnerability and proceed.
   - if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then npm audit; else npm audit || true; fi
   - npm test
+  - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
   - docker buildx create --name xbuilder --use
   - docker buildx build --progress plain --platform linux/amd64,linux/ppc64le -t "quay.io/razee/remoteresources3:${TRAVIS_COMMIT}" .
   - if [[ $TRAVIS_TAG =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then npm version --no-git-tag-version "${TRAVIS_TAG}"; fi
