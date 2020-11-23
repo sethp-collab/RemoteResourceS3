@@ -6,7 +6,7 @@ node_js:
 env:
   global:
     - GROUP=deploy.razee.io
-    - VERSION=v1alpha2
+    #- VERSION=v1alpha2
     - DOCKER_CLI_EXPERIMENTAL=enabled
     
 before_install:
