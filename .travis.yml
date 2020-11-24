@@ -20,6 +20,7 @@ script:
   # Audit npm packages. Fail build whan a PR audit fails, otherwise report the vulnerability and proceed.
   - if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then npm audit; else npm audit || true; fi
   - npm test
+  - docker login -u="${QUAY_ID}" -p="${QUAY_TOKEN}" quay.io
   - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
   - docker buildx create --name xbuilder --use
   - docker buildx build --progress plain --platform linux/amd64,linux/ppc64le -t "quay.io/seth_priya/multi-arch-travis:${TRAVIS_COMMIT}" --push .
