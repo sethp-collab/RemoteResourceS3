@@ -108,7 +108,7 @@ jobs:
            condition: ${TRAVIS_TAG} =~ ^[0-9]+\.[0-9]+\.[0-9]+$
            
    - stage: build and push multi-arch image
-     arch: ppc64le
+     arch: amd64
      script:
        - export DOCKER_CLI_EXPERIMENTAL=enabled    
        - if [ -n "${TRAVIS_TAG}" ]; then docker manifest create quay.io/razee/remoteresources3:${TRAVIS_TAG} quay.io/razee/remoteresources3:${TRAVIS_TAG}-amd64 quay.io/razee/remoteresources3:${TRAVIS_TAG}-ppc64le; fi
